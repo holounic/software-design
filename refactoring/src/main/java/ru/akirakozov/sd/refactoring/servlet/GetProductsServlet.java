@@ -1,39 +1,36 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
 import ru.akirakozov.sd.refactoring.dao.ProductDAO;
-import ru.akirakozov.sd.refactoring.entity.Product;
+import ru.akirakozov.sd.refactoring.html.ProductToHtmlConverter;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
-import static ru.akirakozov.sd.refactoring.utils.CommonUtils.*;
+import static ru.akirakozov.sd.refactoring.utils.CommonUtils.RESPONSE_CONTENT_TYPE;
 
 /**
  * @author akirakozov
  */
 public class GetProductsServlet extends HttpServlet {
-    private static final String SELECT_FROM_PRODUCTS = "SELECT * FROM PRODUCT";
     private final ProductDAO productDAO;
+    private final ProductToHtmlConverter htmlConverter;
 
-    public GetProductsServlet(ProductDAO productDAO) {
+    public GetProductsServlet(ProductDAO productDAO, ProductToHtmlConverter htmlConverter) {
         this.productDAO = productDAO;
+        this.htmlConverter = htmlConverter;
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String resp;
         try {
-            response.getWriter().println(OPEN_TAGS);
-            for (Product product : productDAO.getProducts()) {
-                response.getWriter().println(product.getName() + "\t" + product.getPrice() + "</br>");
-            }
-            response.getWriter().println(CLOSE_TAGS);
+            resp = htmlConverter.productsToHtml(productDAO.getProducts());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        response.getWriter().println(resp);
         response.setContentType(RESPONSE_CONTENT_TYPE);
         response.setStatus(HttpServletResponse.SC_OK);
     }

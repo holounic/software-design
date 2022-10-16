@@ -13,6 +13,6 @@ package ru.akirakozov.sd.refactoring.command;
          Optional<Integer> sum = productDAO.getProductPriceSum();
          sum.ifPresent(integer -> html.append(integer).append("\n"));
          html.append("</body></html>");
-         return html.toString();
+         return htmlConverter.valueToHtml(productDAO.getProductPriceSum().get(), "Summary price");
      }
  }
