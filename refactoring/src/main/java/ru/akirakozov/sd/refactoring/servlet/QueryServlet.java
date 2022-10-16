@@ -1,5 +1,6 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
+import ru.akirakozov.sd.refactoring.dao.ProductDAO;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 import javax.servlet.http.HttpServlet;
@@ -21,6 +22,12 @@ public class QueryServlet extends HttpServlet {
 
     private static final String SUMMARY_PRICE_TEXT = "Summary price: ";
     private static final String NUMBER_OF_PRODUCTS = "Number of products: ";
+
+    private final ProductDAO productDAO;
+
+    public QueryServlet(ProductDAO productDAO) {
+        this.productDAO = productDAO;
+    }
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String command = request.getParameter(COMMAND_PARAM);
@@ -29,7 +36,7 @@ public class QueryServlet extends HttpServlet {
             try {
                 response.getWriter().println(OPEN_TAGS);
                 response.getWriter().println(MAX_PRICE_HEADER);
-                Optional<Product> res = getMaxProduct();
+                Optional<Product> res = productDAO.getMaxProduct();
                 if (res.isPresent()) {
                     response.getWriter().println(res.get().getName() + "\t" + res.get().getPrice() + "</br>");
                 }
@@ -40,7 +47,7 @@ public class QueryServlet extends HttpServlet {
             try {
                 response.getWriter().println(OPEN_TAGS);
                 response.getWriter().println(MIN_PRICE_HEADER);
-                Optional<Product> res = getMinProduct();
+                Optional<Product> res = productDAO.getMinProduct();
                 if (res.isPresent()) {
                     response.getWriter().println(res.get().getName() + "\t" + res.get().getPrice() + "</br>");
                 }
@@ -51,7 +58,7 @@ public class QueryServlet extends HttpServlet {
             try {
                 response.getWriter().println(OPEN_TAGS);
                 response.getWriter().println(SUMMARY_PRICE_TEXT);
-                Optional<Integer> sum = getProductPriceSum();
+                Optional<Integer> sum = productDAO.getProductPriceSum();
                 if (sum.isPresent()) {
                     response.getWriter().println(sum.get());
                 }
@@ -63,7 +70,7 @@ public class QueryServlet extends HttpServlet {
             try {
                 response.getWriter().println(OPEN_TAGS);
                 response.getWriter().println(NUMBER_OF_PRODUCTS);
-                Optional<Integer> count = getProductCount();
+                Optional<Integer> count = productDAO.getProductCount();
                 if (count.isPresent()) {
                     response.getWriter().println(count.get());
                 }
@@ -78,74 +85,4 @@ public class QueryServlet extends HttpServlet {
         response.setContentType(RESPONSE_CONTENT_TYPE);
         response.setStatus(HttpServletResponse.SC_OK);
     }
-
-    private Optional<Product> getMaxProduct() throws SQLException {
-        try (Connection c = DriverManager.getConnection(CONNECTION_URL)) {
-            Product res = null;
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1");
-
-            while (rs.next()) {
-                String name = rs.getString(NAME_COLUMN);
-                int price = rs.getInt(PRICE_COLUMN);
-                res = new Product(name, price);
-            }
-
-            rs.close();
-            stmt.close();
-            return Optional.ofNullable(res);
-        }
-    }
-
-    private Optional<Product> getMinProduct() throws SQLException {
-        try (Connection c = DriverManager.getConnection(CONNECTION_URL)) {
-            Product res = null;
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1");
-
-            while (rs.next()) {
-                String name = rs.getString(NAME_COLUMN);
-                int price = rs.getInt(PRICE_COLUMN);
-                res = new Product(name, price);
-            }
-
-            rs.close();
-            stmt.close();
-            return Optional.ofNullable(res);
-        }
-    }
-
-
-    private Optional<Integer> getProductPriceSum() throws SQLException {
-        try (Connection c = DriverManager.getConnection(CONNECTION_URL)) {
-            Integer res = null;
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT SUM(price) FROM PRODUCT");
-
-            while (rs.next()) {
-                res = rs.getInt(1);
-            }
-
-            rs.close();
-            stmt.close();
-            return Optional.ofNullable(res);
-        }
-    }
-
-    private Optional<Integer> getProductCount() throws SQLException {
-        try (Connection c = DriverManager.getConnection(CONNECTION_URL)) {
-            Integer res = null;
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM PRODUCT");
-
-            while (rs.next()) {
-                res = rs.getInt(1);
-            }
-
-            rs.close();
-            stmt.close();
-            return Optional.ofNullable(res);
-        }
-    }
-
 }

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import ru.akirakozov.sd.refactoring.dao.ProductDAO;
 import ru.akirakozov.sd.refactoring.utils.DbUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -30,10 +31,11 @@ class QueryServletTest {
 
     private QueryServlet servlet;
 
+    private final ProductDAO productDAO = new ProductDAO();
     @BeforeEach
     void setUp() throws SQLException {
         MockitoAnnotations.openMocks(this);
-        servlet = new QueryServlet();
+        servlet = new QueryServlet(productDAO);
         DbUtils.initProducts();
         DbUtils.addSampleData();
     }
