@@ -9,6 +9,16 @@ import java.util.Optional;
 
 public class ProductDAO {
 
+    public void addProduct(Product product) throws SQLException {
+        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
+            String sql = "INSERT INTO PRODUCT " +
+                    "(NAME, PRICE) VALUES (\"" + product.getName() + "\"," + product.getPrice() + ")";
+            Statement stmt = c.createStatement();
+            stmt.executeUpdate(sql);
+            stmt.close();
+        }
+    }
+
     public List<Product> getProducts() throws SQLException {
         try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
             Statement stmt = c.createStatement();

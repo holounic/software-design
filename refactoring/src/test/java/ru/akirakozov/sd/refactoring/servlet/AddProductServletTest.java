@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 
 import org.mockito.MockitoAnnotations;
+import ru.akirakozov.sd.refactoring.dao.ProductDAO;
 import ru.akirakozov.sd.refactoring.utils.DbUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,10 +33,12 @@ class AddProductServletTest {
 
     private AddProductServlet servlet;
 
+    private final ProductDAO productDAO = new ProductDAO();
+
     @BeforeEach
     void setUp() throws SQLException {
         MockitoAnnotations.openMocks(this);
-        servlet = new AddProductServlet();
+        servlet = new AddProductServlet(productDAO);
         DbUtils.initProducts();
     }
 
@@ -62,19 +65,7 @@ class AddProductServletTest {
         when(request.getParameter("name")).thenReturn("hello");
         when(request.getParameter("price")).thenReturn("20");
         when(response.getWriter()).thenReturn(new PrintWriter(new StringWriter()));
-
         servlet.doGet(request, response);
-
-        try (Connection c = DbUtils.getConnection()) {
-            try (Statement s = c.createStatement()) {
-                ResultSet rs = s.executeQuery(SELECT_ALL_FROM_PRODUCT_SQL);
-
-                assertThat(rs.next()).isTrue();
-                String name = rs.getString("name");
-                int price = rs.getInt("price");
-                assertThat(name).isEqualTo("hello");
-                assertThat(price).isEqualTo(20);
-            }
-        }
+        assertThat(productDAO.getProductCount()).contains(1);
     }
 }

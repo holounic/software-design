@@ -1,5 +1,6 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
+import ru.akirakozov.sd.refactoring.dao.ProductDAO;
 import ru.akirakozov.sd.refactoring.entity.Product;
 
 import javax.servlet.http.HttpServlet;
@@ -18,13 +19,18 @@ import static ru.akirakozov.sd.refactoring.utils.CommonUtils.*;
  */
 public class AddProductServlet extends HttpServlet {
 
+    private final ProductDAO productDAO;
+
+    public AddProductServlet(ProductDAO productDAO) {
+        this.productDAO = productDAO;
+    }
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String name = request.getParameter(NAME_COLUMN);
         long price = Long.parseLong(request.getParameter(PRICE_COLUMN));
 
         try {
-            addProduct(new Product(name, price));
+            productDAO.addProduct(new Product(name, price));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -32,15 +38,5 @@ public class AddProductServlet extends HttpServlet {
         response.setContentType(RESPONSE_CONTENT_TYPE);
         response.setStatus(HttpServletResponse.SC_OK);
         response.getWriter().println("OK");
-    }
-
-    private void addProduct(Product product) throws SQLException {
-        try (Connection c = DriverManager.getConnection(CONNECTION_URL)) {
-            String sql = "INSERT INTO PRODUCT " +
-                    "(NAME, PRICE) VALUES (\"" + product.getName() + "\"," + product.getPrice() + ")";
-            Statement stmt = c.createStatement();
-            stmt.executeUpdate(sql);
-            stmt.close();
-        }
     }
 }
