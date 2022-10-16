@@ -35,7 +35,7 @@ class QueryServletTest {
     @BeforeEach
     void setUp() throws SQLException {
         MockitoAnnotations.openMocks(this);
-        servlet = new QueryServlet(productDAO);
+        servlet = new QueryServlet();
         productDAO.initProducts();
         DbUtils.addSampleData();
     }
