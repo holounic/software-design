@@ -9,19 +9,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.akirakozov.sd.refactoring.servlet.Utils.*;
+
 /**
  * @author akirakozov
  */
 public class GetProductsServlet extends HttpServlet {
     private static final String SELECT_FROM_PRODUCTS = "SELECT * FROM PRODUCT";
-    private static final String NAME_COLUMN = "name";
-    private static final String PRICE_COLUMN = "price";
-
-    private static final String CONNECTION_URL = "jdbc:sqlite:test.db";
-
-    private static final String RESPONSE_CONTENT_TYPE = "text/html";
-    private static final String OPEN_TAGS = "<html><body>";
-    private static final String CLOSE_TAGS = "</body></html>";
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
