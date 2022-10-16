@@ -37,12 +37,12 @@ class GetProductsServletTest {
     void setUp() throws SQLException {
         MockitoAnnotations.openMocks(this);
         servlet = new GetProductsServlet(productDAO);
-        DbUtils.initProducts();
+        productDAO.initProducts();
     }
 
     @AfterEach
     void tearDown() throws SQLException {
-        DbUtils.clearProducts();
+        productDAO.clearProducts();
     }
 
     @Test

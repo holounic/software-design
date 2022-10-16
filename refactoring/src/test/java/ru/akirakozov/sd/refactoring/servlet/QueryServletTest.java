@@ -36,13 +36,13 @@ class QueryServletTest {
     void setUp() throws SQLException {
         MockitoAnnotations.openMocks(this);
         servlet = new QueryServlet(productDAO);
-        DbUtils.initProducts();
+        productDAO.initProducts();
         DbUtils.addSampleData();
     }
 
     @AfterEach
     void tearDown() throws SQLException {
-        DbUtils.clearProducts();
+        productDAO.clearProducts();
     }
 
     @Test

@@ -23,8 +23,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AddProductServletTest {
 
-    private static final String SELECT_ALL_FROM_PRODUCT_SQL = "SELECT * FROM PRODUCT";
-
     @Mock
     private HttpServletRequest request;
 
@@ -39,12 +37,12 @@ class AddProductServletTest {
     void setUp() throws SQLException {
         MockitoAnnotations.openMocks(this);
         servlet = new AddProductServlet(productDAO);
-        DbUtils.initProducts();
+        productDAO.initProducts();
     }
 
     @AfterEach
     void tearDown() throws SQLException {
-        DbUtils.clearProducts();
+        productDAO.clearProducts();
     }
 
     @Test
