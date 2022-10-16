@@ -7,40 +7,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static ru.akirakozov.sd.refactoring.utils.CommonUtils.CONNECTION_URL;
+
 public class ProductDAO {
     public void initProducts() throws SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-            try (Statement s = c.createStatement()) {
-                String sql = "CREATE TABLE IF NOT EXISTS PRODUCT" +
-                        "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
-                        " NAME           TEXT    NOT NULL, " +
-                        " PRICE          INT     NOT NULL)";
-                s.executeUpdate(sql);
-            }
-        }
+        executeUpdate("CREATE TABLE IF NOT EXISTS PRODUCT" +
+                "(ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL," +
+                " NAME           TEXT    NOT NULL, " +
+                " PRICE          INT     NOT NULL)");
     }
 
     public void clearProducts() throws SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-            try (Statement stmt = c.createStatement()) {
-                String sql = "DELETE FROM PRODUCT";
-                stmt.executeUpdate(sql);
-            }
-        }
+        executeUpdate("DELETE FROM PRODUCT");
     }
 
     public void addProduct(Product product) throws SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-            String sql = "INSERT INTO PRODUCT " +
-                    "(NAME, PRICE) VALUES (\"" + product.getName() + "\"," + product.getPrice() + ")";
-            Statement stmt = c.createStatement();
-            stmt.executeUpdate(sql);
-            stmt.close();
-        }
+        executeUpdate("INSERT INTO PRODUCT " +
+                "(NAME, PRICE) VALUES (\"" + product.getName() + "\"," + product.getPrice() + ")");
     }
 
     public List<Product> getProducts() throws SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
+        try (Connection c = getConnection()) {
             Statement stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT");
 
@@ -57,7 +44,7 @@ public class ProductDAO {
     }
 
     public Optional<Product> getMaxProduct() throws SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
+        try (Connection c = getConnection()) {
             Product res = null;
             Statement stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1");
@@ -75,7 +62,7 @@ public class ProductDAO {
     }
 
     public Optional<Product> getMinProduct() throws SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
+        try (Connection c = getConnection()) {
             Product res = null;
             Statement stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1");
@@ -94,7 +81,7 @@ public class ProductDAO {
 
 
     public Optional<Integer> getProductPriceSum() throws SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
+        try (Connection c = getConnection()) {
             Integer res = null;
             Statement stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT SUM(price) FROM PRODUCT");
@@ -110,7 +97,7 @@ public class ProductDAO {
     }
 
     public Optional<Integer> getProductCount() throws SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
+        try (Connection c = getConnection()) {
             Integer res = null;
             Statement stmt = c.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM PRODUCT");
@@ -123,5 +110,17 @@ public class ProductDAO {
             stmt.close();
             return Optional.ofNullable(res);
         }
+    }
+
+    private void executeUpdate(String sql) throws SQLException {
+        try (Connection c = getConnection()) {
+            try (Statement stmt = c.createStatement()) {
+                stmt.executeUpdate(sql);
+            }
+        }
+    }
+
+    private Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(CONNECTION_URL);
     }
 }
