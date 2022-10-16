@@ -20,8 +20,7 @@ public class QueryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String command = request.getParameter(COMMAND_PARAM);
-        ProductCommand com = null;
-        StringBuilder html = new StringBuilder();
+        ProductCommand com;
         if (MAX_COMMAND.equals(command)) {
             com = new MaxProduct();
         } else if (MIN_COMMAND.equals(command)) {
@@ -31,7 +30,7 @@ public class QueryServlet extends HttpServlet {
         } else if (COUNT_COMMAND.equals(command)) {
             com = new CountProducts();
         } else {
-            html.append("Unknown command: ").append(command).append("\n");
+            com = new UnknownCommand(command);
         }
         try {
             response.getWriter().println(com.toHtml());
