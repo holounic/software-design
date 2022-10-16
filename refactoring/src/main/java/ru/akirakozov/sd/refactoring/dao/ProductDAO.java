@@ -27,89 +27,40 @@ public class ProductDAO {
     }
 
     public List<Product> getProducts() throws SQLException {
-        try (Connection c = getConnection()) {
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT");
-
-            List<Product> res = new ArrayList<>();
-            while (rs.next()) {
-                String name = rs.getString("name");
-                long price = rs.getLong("price");
-                res.add(new Product(name, price));
-            }
-            rs.close();
-            stmt.close();
-            return res;
-        }
+        return executeQuery("SELECT * FROM PRODUCT", rs -> {
+            String name = rs.getString("name");
+            long price = rs.getLong("price");
+            return new Product(name, price);
+        });
     }
 
     public Optional<Product> getMaxProduct() throws SQLException {
-        try (Connection c = getConnection()) {
-            Product res = null;
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1");
-
-            while (rs.next()) {
-                String name = rs.getString("name");
-                int price = rs.getInt("price");
-                res = new Product(name, price);
-            }
-
-            rs.close();
-            stmt.close();
-            return Optional.ofNullable(res);
-        }
+        List<Product> products = executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1", rs -> {
+            String name = rs.getString("name");
+            int price = rs.getInt("price");
+            return new Product(name, price);
+        });
+        return lastOrEmpty(products);
     }
 
     public Optional<Product> getMinProduct() throws SQLException {
-        try (Connection c = getConnection()) {
-            Product res = null;
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1");
-
-            while (rs.next()) {
-                String name = rs.getString("name");
-                int price = rs.getInt("price");
-                res = new Product(name, price);
-            }
-
-            rs.close();
-            stmt.close();
-            return Optional.ofNullable(res);
-        }
+        List<Product> products = executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1", rs -> {
+            String name = rs.getString("name");
+            int price = rs.getInt("price");
+            return new Product(name, price);
+        });
+        return lastOrEmpty(products);
     }
 
 
     public Optional<Integer> getProductPriceSum() throws SQLException {
-        try (Connection c = getConnection()) {
-            Integer res = null;
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT SUM(price) FROM PRODUCT");
-
-            while (rs.next()) {
-                res = rs.getInt(1);
-            }
-
-            rs.close();
-            stmt.close();
-            return Optional.ofNullable(res);
-        }
+        List<Integer> sums = executeQuery("SELECT SUM(price) FROM PRODUCT", rs -> rs.getInt(1));
+        return lastOrEmpty(sums);
     }
 
     public Optional<Integer> getProductCount() throws SQLException {
-        try (Connection c = getConnection()) {
-            Integer res = null;
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM PRODUCT");
-
-            while (rs.next()) {
-                res = rs.getInt(1);
-            }
-
-            rs.close();
-            stmt.close();
-            return Optional.ofNullable(res);
-        }
+        List<Integer> sums = executeQuery("SELECT COUNT(*) FROM PRODUCT", rs -> rs.getInt(1));
+        return lastOrEmpty(sums);
     }
 
     private void executeUpdate(String sql) throws SQLException {
@@ -122,5 +73,27 @@ public class ProductDAO {
 
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(CONNECTION_URL);
+    }
+
+    private <T> List<T> executeQuery(String sql, SQLFunction<ResultSet, T> rsMapper) throws SQLException {
+        try (Connection c = getConnection()) {
+            try (Statement stmt = c.createStatement()) {
+                try (ResultSet rs = stmt.executeQuery(sql)) {
+                    List<T> res = new ArrayList<>();
+                    while (rs.next()) {
+                        res.add(rsMapper.apply(rs));
+                    }
+                    return res;
+                }
+            }
+        }
+    }
+
+    private <T> Optional<T> lastOrEmpty(List<T> products) {
+        return products.isEmpty() ? Optional.empty() : Optional.of(products.get(products.size() - 1));
+    }
+
+    interface SQLFunction<T, R> {
+        R apply(T arg) throws SQLException;
     }
 }
