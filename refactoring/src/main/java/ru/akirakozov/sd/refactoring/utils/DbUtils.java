@@ -1,4 +1,4 @@
-package ru.akirakozov.sd.refactoring;
+package ru.akirakozov.sd.refactoring.utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

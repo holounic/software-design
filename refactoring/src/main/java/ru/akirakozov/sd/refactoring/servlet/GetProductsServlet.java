@@ -9,7 +9,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static ru.akirakozov.sd.refactoring.servlet.Utils.*;
+import static ru.akirakozov.sd.refactoring.utils.CommonUtils.*;
 
 /**
  * @author akirakozov

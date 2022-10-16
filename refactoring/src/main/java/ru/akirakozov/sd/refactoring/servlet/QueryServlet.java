@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.Optional;
 
-import static ru.akirakozov.sd.refactoring.servlet.Utils.*;
+import static ru.akirakozov.sd.refactoring.utils.CommonUtils.*;
 
 /**
  * @author akirakozov
