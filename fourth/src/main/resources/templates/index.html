@@ -1,0 +1,60 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head>
+    <title>Todos</title>
+</head>
+<body>
+
+<h3>Todo Lists</h3>
+
+<div th:each="todoList : ${todoLists}" style="display: inline-block;">
+    <h1 th:text="${todoList.getName()}" style="margin-bottom: 0;"></h1>
+    <a th:href="@{delete-todo-list(id=${todoList.id})}">Delete list</a>
+    <table style="border: 1px solid black;">
+        <thead>
+        <tr>
+            <th style="border: 1px solid black">Name</th>
+            <th style="border: 1px solid black">Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="todo : ${todoList.getTodos()}">
+            <td th:text="${todo.getTitle()}" style="border: 1px solid black"></td>
+            <td th:text='${todo.getDone() ? "✓" : "x"}' style="border: 1px solid black"></td>
+            <td style="border: 1px solid black">
+                <a th:href="@{toggle-todo(id=${todo.id})}">Toggle</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<h3>Add new list</h3>
+<form th:object="${todoList}" method="POST" action="/add-todo-list">
+    <label>
+        Name:
+        <input type="text" th:field="*{name}"/>
+    </label>
+    <input type="submit" value="add">
+</form>
+
+<div th:unless="${#lists.isEmpty(todoLists)}">
+    <h3>Add todo</h3>
+    <form th:object="${todo}" method="POST" action="/add-todo">
+        <label>
+            Title:
+            <input type="text" th:field="*{title}"/>
+        </label>
+        <label>
+            List:
+            <select th:field="*{list}" class="form-control">
+                <option th:each="todoList: ${todoLists}" th:value="${todoList.id}"
+                        th:text="${todoList.name}"></option>
+            </select>
+        </label>
+        <input type="submit" value="add">
+    </form>
+</div>
+</body>
+</html>
